@@ -9,7 +9,7 @@ Run the benchmarks with
 ./bench.sh
 ```
 
-## Go Board
+### Go Board
 
 A benchmark that requires reading Go moves from stdin, playing them on a Go board and printing the final score.
 
