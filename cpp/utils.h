@@ -12,7 +12,7 @@ class FatalError {
       return *this;
     }
 
-    ~FatalError() {
+    [[ noreturn ]] ~FatalError() {
       std::cerr << ss_.str() << std::endl;
       exit(EXIT_FAILURE);
     }
