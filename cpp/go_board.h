@@ -12,6 +12,8 @@ enum class GoColor : uint8_t { kBlack = 0, kWhite = 1, kEmpty = 2, kGuard = 3 };
 
 std::string GoColorToString(GoColor c);
 
+GoColor MakeColor(std::string s);
+
 std::ostream &operator<<(std::ostream &os, GoColor c);
 
 GoColor OppColor(GoColor c);

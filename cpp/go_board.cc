@@ -68,7 +68,7 @@ char GoColorToChar(GoColor c) {
     case GoColor::kGuard:
       return '#';
     default:
-      FatalError() << "Unknown color " << c << " in GoColorToChar.";
+      FATAL() << "Unknown color " << c << " in GoColorToChar.";
       return '!';
   }
 }
@@ -154,7 +154,7 @@ const std::vector<VirtualPoint>& BoardPoints(int board_size) {
     CASE_GET_POINTS(18);
     CASE_GET_POINTS(19);
     default:
-      FatalError() << "unsupported board size";
+      FATAL() << "unsupported board size";
   }
 
 #undef CASE_GET_POINTS
@@ -170,8 +170,7 @@ GoColor OppColor(GoColor c) {
     case GoColor::kGuard:
       return c;
     default:
-      FatalError() << "Unknown color " << c << " in OppColor.";
-      return c;
+      FATAL() << "Unknown color " << c << " in OppColor.";
   }
 }
 
@@ -190,10 +189,19 @@ std::string GoColorToString(GoColor c) {
     case GoColor::kGuard:
       return "GUARD";
     default:
-      FatalError() << "Unknown color " << c << " in GoColorToString.";
-      return "This will never return.";
+      FATAL() << "Unknown color " << c << " in GoColorToString.";
   }
 }
+
+GoColor MakeColor(std::string s) {
+  std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+  if (s == "b" || s == "black") return GoColor::kBlack;
+  if (s == "w" || s == "white") return GoColor::kWhite;
+  if (s == "empty") return GoColor::kEmpty;
+  if (s == "guard") return GoColor::kGuard;
+  FATAL() << "Unknown color " << s;
+}
+
 
 std::ostream& operator<<(std::ostream& os, VirtualPoint p) {
   return os << VirtualPointToString(p);
@@ -232,7 +240,7 @@ VirtualPoint MakePoint(std::string s) {
 GoBoard::GoBoard(int board_size)
     : board_size_(board_size), pass_action_(board_size * board_size) {
   if (board_size_ > 19) {
-   FatalError() << "The current Go implementation supports board size up to "
+   FATAL() << "The current Go implementation supports board size up to "
                      "19. Provided: " << board_size;
   }
   Clear();
@@ -274,10 +282,10 @@ bool GoBoard::PlayMove(VirtualPoint p, GoColor c) {
   }
 
   if (board_[p].color != GoColor::kEmpty) {
-    FatalError() << "Trying to play the move " << GoColorToString(c) <<
+    FATAL() << "Trying to play the move " << GoColorToString(c) <<
                     ": " << VirtualPointToString(p) << " (" << static_cast<int>(p) <<
                     ") but the cell is already filled with " <<
-                    GoColorToString(board_[p].color);
+                    GoColorToString(board_[p].color) << ": " << ToString();
   }
   CHECK_EQ(GoColor::kEmpty, board_[p].color);
 
@@ -301,7 +309,7 @@ bool GoBoard::PlayMove(VirtualPoint p, GoColor c) {
     last_ko_point_ = kInvalidPoint;
   }
 
-  CHECK_GT(chain(p).num_pseudo_liberties, 0);
+  CHECK_GT(chain(p).num_pseudo_liberties, 0) << ToString();
 
   return true;
 }
@@ -319,7 +327,7 @@ VirtualPoint GoBoard::SingleLiberty(VirtualPoint p) const {
     if (ChainHead(*n) == head) return liberty;
   }
 
-  FatalError() << "liberty" << VirtualPointToString(liberty) 
+  FATAL() << "liberty" << VirtualPointToString(liberty) 
                << " does not actually border group " << VirtualPointToString(p);
 }
 
@@ -642,7 +650,7 @@ float TrompTaylorScore(const GoBoard& board, float komi, int handicap) {
         break;
       }
       case GoColor::kGuard:
-        FatalError() << "unexpected color";
+        FATAL() << "unexpected color";
     }
   }
 
@@ -664,7 +672,7 @@ GoBoard CreateBoard(const std::string& initial_stones) {
     for (const auto& c : line) {
       if (c == ' ') {
         if (stones_started) {
-          FatalError() <<
+          FATAL() <<
               "Whitespace is only allowed at the start of "
               "the line. To represent empty intersections, "
               "use +";
